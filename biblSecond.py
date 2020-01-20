@@ -23,14 +23,24 @@ def getBool(inputMessage):
         elif (inp = 'n'):
             return False
 
+def getString(inputMessage):
+    while True:
+        caden = input(inputMessage+"\t")
+        if getBool("Input Leido:\n\t'{}'\n¿Confirmar?".format(caden)):
+            return caden
+
 def confirmStr(st):
     print("Cadena aceptada: \n\t'{}'")
     return getBool("¿Confirmar?")
 
-def promedioLeg(l1,l2):
-    #devuelve el promedio de l1 y l2 consideando que l1 y l2 tienen la forma "AAA-000-..."
-    lAns = "AAA-000"
-    return lAns
+def parleg(leg):
+    return leg.split("-")
+
+def unparleg(leglist):
+    ans = ''
+    for el in leglist:
+        ans = ans+'-'+el
+    return ans[1:]
 
 class Libro:
     def __init__(self,arg=''):
@@ -70,22 +80,9 @@ class Libro:
         self.owner = "propio"
 
     def crearLibro(self):
-        while True:
-            caden = input("Titulo del libro: ")
-            if confirm(caden):
-                self.title = caden
-                break
-
-        while True:
-            caden = input("Autor del libro: ")
-            if confirm(caden):
-                self.author = caden
-                break
-        while True:
-            caden = input("Genero del libro: ")
-            if confirm(caden):
-                self.genre = caden
-                break
+        self.title = getString("Titulo del libro:")
+        self.author = getString("Autor del libro:")
+        self.genre = getString("Genero del libro:")
         
         if (getBool("¿Esta disponible?")):
             self.stateLib = "disponible"
@@ -102,11 +99,7 @@ class Libro:
         if(getBool("¿El libro es propio?")):
             self.owner = "propio"
         else:
-            while True:
-                caden = input("Introducir dueño: ")
-                if confirmStr(caden):
-                    self.owner = caden
-                    break
+            self.owner = getString("Owner:")
         
         if(getBool("¿Fue ya leido?")):
             self.stateLec = "leido"
@@ -124,7 +117,6 @@ class Libro:
         else:
             self.stateLib = "no disponible"
             
-
 class Biblioteca:
     def __init__(self):
         self.leglis = [] #Lista EN ORDEN de libros cargados a la biblioteca
@@ -137,10 +129,43 @@ class Biblioteca:
         self.locationDic = {'fisica':[],'digital':[]}
 
     def addBook(self,bookObj):
-        pass
+        if (bookObj.leg == 'AAA-000'):
+            print("Legajo generico detectado")
+            bookleg = self.generateNewLeg()
+
+    def avaliableLeg(leg):
+        #devuelve True si el legajo introducido no esta usado en la biblioteca
+        return True          
+
+    def generateNewLeg(self):
+        if (getBool("¿Ya se tiene legajo elegido?")):
+            legGen = getString("Introducir legajo:")
+        else:
+            print("Generando legajo.")
+            if getBool("Legajo sucesor:\n\tEl numero obtenido es el inmediatamente siguiente al libro anterior, sin posibilidad de futuros libros en el medio. Reservado para secuelas o volumenes.\n¿Es un legajo sucesor?"):
+                prevleg = parleg(getString("Introducir legajo anterior:"))
+                tempList = prevleg[:-1]
+                tempList.append(int(prevleg[-1])+1)
+                lAns = unparleg(tempList)
+                print("Legajo generado: {}")
+                if not getBool("¿Confirmar?"):
+                    print("Regenerando...")
+                    return self.generateNewLeg()
+                else:
+                    return lAns
+            #TODO:: AGREGAR EL PROMEDIO DE DOS PARSED LEGS.
+            return "AAA-000"
+
+    def getNextLeg(self,l):
+        #goes through the list and finds the book that follows l
+        lAns = "AAA-000"
+        return lAns
+        
 
     def markAsRemoved(self,leg):
-        pass
+        #user list.remove(element)
+        book = self.catalog[leg]
+
     
     def deleteBook(self,leg):
         pass
