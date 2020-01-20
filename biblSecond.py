@@ -64,10 +64,10 @@ class Libro:
         self.title = "LIBRO DESCONOCIDO"
         self.author = "AUTOR DESCONOCIDO"
         self.genre = "GENERO DESCONOCIDO"
-        self.stateLib = "Disponible"
-        self.stateLec = "No Leido"
-        self.location = "Biblioteca Fisica"
-        self.owner = "Propio"
+        self.stateLib = "disponible"
+        self.stateLec = "no leido"
+        self.location = "fisica"
+        self.owner = "propio"
 
     def crearLibro(self):
         while True:
@@ -99,6 +99,32 @@ class Libro:
         else:
             self.location = "digital"
 
+        if(getBool("¿El libro es propio?")):
+            self.owner = "propio"
+        else:
+            while True:
+                caden = input("Introducir dueño: ")
+                if confirmStr(caden):
+                    self.owner = caden
+                    break
+        
+        if(getBool("¿Fue ya leido?")):
+            self.stateLec = "leido"
+        elif(getBool("¿No leido?")):
+            self.stateLec = "no leido"
+        elif(getBool("¿Abandonado?")):
+            self.stateLec = "abandonado"
+        else:
+            self.stateLec = "en progreso"
+
+        if(getBool("¿El libro esta disponible?")):
+            self.stateLib = "disponible"
+        elif(getBool("¿Fue prestado?")):
+            self.stateLib = "prestado"
+        else:
+            self.stateLib = "no disponible"
+            
+
 class Biblioteca:
     def __init__(self):
         self.leglis = [] #Lista EN ORDEN de libros cargados a la biblioteca
@@ -109,11 +135,27 @@ class Biblioteca:
         self.stateLecDic = {'leido':[],'no leido':[],'abandonado':[],'en progreso':[]} #Diccionario de leg con key=lecStateStr
         self.ownerDic = {'propio':[]}
         self.locationDic = {'fisica':[],'digital':[]}
+
+    def addBook(self,bookObj):
+        pass
+
+    def markAsRemoved(self,leg):
+        pass
     
+    def deleteBook(self,leg):
+        pass
+
+    def editBook(self,leg):
+        pass
+
     def saveIntoFile(self,filename):
         #creates a file with filename and saves contents of the library in a parsable text form
         pass
 
     def loadLibraryFromFile(self,filename):
         #abre la forma parsable creada por saveIntoFile y carga todos los datos a la biblioteca
+        pass
+
+    def saveClassObject(self,filename):
+        #use pickle
         pass
