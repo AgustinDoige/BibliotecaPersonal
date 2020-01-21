@@ -34,14 +34,36 @@ def confirmStr(st):
     return getBool("¿Confirmar?")
 
 def parleg(leg):
-    return leg.split("-")
+    tlis = leg.split("-")
+    return tlis[0]+int(tlis[1])
 
 def unparleg(leglist):
-    ans = ''
-    for el in leglist:
-        ans = ans+'-'+el
-    return ans[1:]
+    return leglist[0]+'-'+str(leglist[1]).zfill(3)
 
+def isValidLeg(leg):
+    tlis = leg.split("-")
+    if ((len(tlis)!=2) or (len(tlis[0])!=3) or (len(tlis[1])!=3)):
+        return False
+    try:
+        temp = int(tlis[1])
+    except Exception:
+        return False
+    return True
+
+def nextLetterTrio(st):
+    #  returns AAB from AAA, ABA from AAZ and so on
+    alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    if st[2]=="Z":
+        if st[1]=="Z":
+            if st[0]=="Z":
+                print("ERROR ERROR ERROR: Input 'ZZZ' to nextLetterTrio function.\TILT")
+                raise ValueError
+                while True:
+                    pass
+            return alphabet[alphabet.index(st[0])+1]+"AA"
+        return st[0]+alphabet[alphabet.index(st[1])+1]+"A"
+    return st[0]+st[1]+alphabet[alphabet.index(st[2])+1]
+            
 class Libro:
     def __init__(self,arg=''):
         # Legajo Nombre Autor Genero Estado_de_Libro Estado_de_Lectura
@@ -133,39 +155,65 @@ class Biblioteca:
             print("Legajo generico detectado")
             bookleg = self.generateNewLeg()
 
-    def avaliableLeg(leg):
+    def avaliableLeg(self,leg):
         #devuelve True si el legajo introducido no esta usado en la biblioteca
-        return True          
+        try:
+            temp = self.catalog(leg)
+            return False
+        except KeyError:
+            return True
 
     def generateNewLeg(self):
         if (getBool("¿Ya se tiene legajo elegido?")):
             legGen = getString("Introducir legajo:")
+            if (avaliableLeg(legGen):
+                if isValidLeg(legGen)):
+                    return legGen
+                else:
+                    print("Error: legajo Invalido.\nRegenerando.")
+                    return self.generateNewLeg()
+            else:
+                print("Error: legajo Ocupado\nRegenerando.")
+                return self.generateNewLeg()
         else:
             print("Generando legajo.")
-            if getBool("Legajo sucesor:\n\tEl numero obtenido es el inmediatamente siguiente al libro anterior, sin posibilidad de futuros libros en el medio. Reservado para secuelas o volumenes.\n¿Es un legajo sucesor?"):
-                prevleg = parleg(getString("Introducir legajo anterior:"))
-                tempList = prevleg[:-1]
-                tempList.append(int(prevleg[-1])+1)
-                lAns = unparleg(tempList)
+            sucesorInmediatoBool = getBool("Legajo sucesor:\n\tEl numero obtenido es el inmediatamente siguiente al libro anterior, sin posibilidad de futuros libros en el medio. Reservado para secuelas o volumenes.\n¿Es un legajo sucesor?")
+            prevleg = parleg(getString("Introducir legajo anterior:"))
+            try:  #Seeing if leg introduced exists
+                ind = self.leglis.index(prevleg)
+            except Exception:
+                print("Legajo introducido no encontrado en biblioteca.\nRegenerando.")
+                return self.generateNewLeg()
+            if getBool("¿Mostrar legajos cercanos?"):
+                print(self.leglis[ind-7:ind+8])
+            if(sucesorInmediatoBool):
+                if (prevleg[1]==999):
+                    lAns = unparleg([nextLetterTrio(prevleg[0]),0])
+                else:
+                    lAns = unparleg([prevleg[0],prevleg[1]+1]))
+                if not avaliableLeg(lAns):
+                    print("Error: Legajo sucesor inmediato no disponible.\nRegenerando.")
+                    return self.generateNewLeg()
                 print("Legajo generado: {}")
                 if not getBool("¿Confirmar?"):
-                    print("Regenerando...")
+                    print("Regenerando.")
                     return self.generateNewLeg()
                 else:
                     return lAns
-            #TODO:: AGREGAR EL PROMEDIO DE DOS PARSED LEGS.
-            return "AAA-000"
+            #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO SUCESOR NO INMEDIATO
+            
+        
 
     def getNextLeg(self,l):
-        #goes through the list and finds the book that follows l
-        lAns = "AAA-000"
-        return lAns
-        
+        #returns the next logged book in the library
+        try:
+            return self.leglis.index(l)+1
+        except ValueError:
+            return -1
 
     def markAsRemoved(self,leg):
         #user list.remove(element)
         book = self.catalog[leg]
-
     
     def deleteBook(self,leg):
         pass
