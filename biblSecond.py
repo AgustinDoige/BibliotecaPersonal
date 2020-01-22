@@ -34,10 +34,6 @@ def getString(inputMessage):
         if getBool("Input Leido:\n\t'{}'\n¿Confirmar?".format(caden)):
             return caden
 
-def confirmStr(st):
-    print("Cadena aceptada: \n\t'{}'")
-    return getBool("¿Confirmar?")
-
 def parleg(leg):
     tlis = leg.split("-")
     return tlis[0]+int(tlis[1])
@@ -54,6 +50,13 @@ def isValidLeg(leg):
     except Exception:
         return False
     return True
+
+def logDict(dic,key,item):
+    """Tries to log item in the list of the dictionary in order. If such key with list doens't exist. It creates it."""
+    try:
+        AddInOrder(dic[key],item)
+    except KeyError:
+        dic[key] = [item]
 
 def nextLetterTrio(st):
     #  returns AAB from AAA, ABA from AAZ and so on
@@ -140,7 +143,11 @@ class Libro:
             self.stateLib = "prestado"
         else:
             self.stateLib = "no disponible"
-    
+        
+    def confirmData(self):
+        #Goes through every data saved in Book and asks for console confirmation. It modifies the data that is wrong.
+        return
+
     def __str__(self):
         anStr = f"Libro {self.leg}::\n\t{self.title} - {self.author}\tGenero: {self.genre}\n\tEstado: {self.stateLib} y {self.stateLec}.\t"
         if (self.location!="fisica"):
@@ -162,24 +169,33 @@ class Biblioteca:
         self.ownerDic = {'propio':[]}
         self.locationDic = {'fisica':[],'digital':[]}
 
-    def addBook(self,bookObj):
-        if (bookObj.leg == 'AAA-000'):
+    def addBook(self,book):
+        if (book.leg == 'AAA-000'):
             print("Legajo generico detectado.\nLlamando self.generateNewLeg()")
-            bookObj.leg = self.generateNewLeg()
+            book.leg = self.generateNewLeg()
         print("Imprimiendo libro para agregar:")       
-        print(bookObj)
+        print(book)
         if getBool("¿Agregar este libro?"):
             try:
-                _ = self.catalog[bookObj.leg]
-                tilt("ERROR: Tried to add book with a leg already used by the following book:\n{}".format(self.catalog[bookObj.leg]))
+                _ = self.catalog[book.leg]
+                tilt("ERROR: Tried to add book with a leg already used by the following book:\n{}".format(self.catalog[book.leg]))
             except Exception:
                 pass
-            self.catalog[bookObj.leg] = bookObj
-            AddInOrder(self.leglis,bookObj.leg)
-            #TODO TODO TODO TODO TODO TODO TODO TODO ADD OTHERS 
-        else:
-            pass
-            #MAYBE SOME DATA NEED TO BE TWEAKED?
+            self.catalog[book.leg] = book
+            AddInOrder(self.leglis,book.leg)
+
+            bklg = book.leg
+            logDict(self.authorDic  ,book.author  ,bklg)
+            logDict(self.genreDic   ,book.genre   ,bklg)
+            logDict(self.stateLibDic,book.stateLib,bklg)
+            logDict(self.stateLecDic,book.stateLec,bklg)
+            logDict(self.ownerDic   ,book.owner   ,bklg)
+            logDict(self.locationDic,book.location,bklg)
+            del bklg
+        elif not getBool("¿Fix Book?"):
+            print("Log Cancelado.")
+            return
+        book.confirmData()
         
 
     def avaliableLeg(self,leg):
