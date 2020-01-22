@@ -13,6 +13,11 @@ def AddInOrder(lis,it):
             lis.append(it)
             break
 
+def tilt(msg):
+    print(msg+"\n\tTilt.")
+    while True:
+        pass
+
 def getBool(inputMessage):
     assert(type(inputMessage)==type("string"))
     im = inputMessage+"\t(y/n)   "
@@ -20,7 +25,7 @@ def getBool(inputMessage):
         inp = input(im).lower()
         if (inp == 'y'):
             return True
-        elif (inp = 'n'):
+        elif (inp == 'n'):
             return False
 
 def getString(inputMessage):
@@ -45,7 +50,7 @@ def isValidLeg(leg):
     if ((len(tlis)!=2) or (len(tlis[0])!=3) or (len(tlis[1])!=3)):
         return False
     try:
-        temp = int(tlis[1])
+        _ = int(tlis[1])
     except Exception:
         return False
     return True
@@ -56,10 +61,7 @@ def nextLetterTrio(st):
     if st[2]=="Z":
         if st[1]=="Z":
             if st[0]=="Z":
-                print("ERROR ERROR ERROR: Input 'ZZZ' to nextLetterTrio function.\TILT")
-                raise ValueError
-                while True:
-                    pass
+                tilt("ERROR: Input 'ZZZ' to nextLetterTrio function.")
             return alphabet[alphabet.index(st[0])+1]+"AA"
         return st[0]+alphabet[alphabet.index(st[1])+1]+"A"
     return st[0]+st[1]+alphabet[alphabet.index(st[2])+1]
@@ -138,6 +140,16 @@ class Libro:
             self.stateLib = "prestado"
         else:
             self.stateLib = "no disponible"
+    
+    def __str__(self):
+        anStr = f"Libro {self.leg}::\n\t{self.title} - {self.author}\tGenero: {self.genre}\n\tEstado: {self.stateLib} y {self.stateLec}.\t"
+        if (self.location!="fisica"):
+            anStr = anStr + "Archivado Digitalmente"
+        elif (self.owner=="propio"):
+            anStr = anStr + "Libro Propio."
+        else:
+            anStr = anStr + f"Owner: {self.owner}"
+        return anStr
             
 class Biblioteca:
     def __init__(self):
@@ -152,13 +164,28 @@ class Biblioteca:
 
     def addBook(self,bookObj):
         if (bookObj.leg == 'AAA-000'):
-            print("Legajo generico detectado")
-            bookleg = self.generateNewLeg()
+            print("Legajo generico detectado.\nLlamando self.generateNewLeg()")
+            bookObj.leg = self.generateNewLeg()
+        print("Imprimiendo libro para agregar:")       
+        print(bookObj)
+        if getBool("¿Agregar este libro?"):
+            try:
+                _ = self.catalog[bookObj.leg]
+                tilt("ERROR: Tried to add book with a leg already used by the following book:\n{}".format(self.catalog[bookObj.leg]))
+            except Exception:
+                pass
+            self.catalog[bookObj.leg] = bookObj
+            AddInOrder(self.leglis,bookObj.leg)
+            #TODO TODO TODO TODO TODO TODO TODO TODO ADD OTHERS 
+        else:
+            pass
+            #MAYBE SOME DATA NEED TO BE TWEAKED?
+        
 
     def avaliableLeg(self,leg):
         #devuelve True si el legajo introducido no esta usado en la biblioteca
         try:
-            temp = self.catalog(leg)
+            _ = self.catalog[leg]
             return False
         except KeyError:
             return True
@@ -166,8 +193,8 @@ class Biblioteca:
     def generateNewLeg(self):
         if (getBool("¿Ya se tiene legajo elegido?")):
             legGen = getString("Introducir legajo:")
-            if (avaliableLeg(legGen):
-                if isValidLeg(legGen)):
+            if (self.avaliableLeg(legGen)):
+                if isValidLeg(legGen):
                     return legGen
                 else:
                     print("Error: legajo Invalido.\nRegenerando.")
@@ -190,8 +217,8 @@ class Biblioteca:
                 if (prevleg[1]==999):
                     lAns = unparleg([nextLetterTrio(prevleg[0]),0])
                 else:
-                    lAns = unparleg([prevleg[0],prevleg[1]+1]))
-                if not avaliableLeg(lAns):
+                    lAns = unparleg([prevleg[0],prevleg[1]+1])
+                if not self.avaliableLeg(lAns):
                     print("Error: Legajo sucesor inmediato no disponible.\nRegenerando.")
                     return self.generateNewLeg()
                 print("Legajo generado: {}")
@@ -200,20 +227,25 @@ class Biblioteca:
                     return self.generateNewLeg()
                 else:
                     return lAns
-            #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO SUCESOR NO INMEDIATO
+            nextLeg = self.getNextIndLeg(prevleg)
+            if (prevleg[0]==nextLeg[0]):
+                lAns = unparleg(prevleg[0],)
+            else:
+                pass
+                #TODO TODO TODO TODO TODO TODO TODO TODO TODO
             
-        
-
-    def getNextLeg(self,l):
+            
+    def getNextIndLeg(self,l):
         #returns the next logged book in the library
         try:
             return self.leglis.index(l)+1
         except ValueError:
-            return -1
+            tilt("Error in getNextIndLeg. input argument: {}".format(l))
 
     def markAsRemoved(self,leg):
-        #user list.remove(element)
-        book = self.catalog[leg]
+        #use list.remove(element)
+        # book = self.catalog[leg]
+        pass
     
     def deleteBook(self,leg):
         pass
