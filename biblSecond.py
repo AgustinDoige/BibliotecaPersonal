@@ -1,3 +1,4 @@
+#encoding utf-8
 import pickle
 
 def AddInOrder(lis,it):
@@ -36,7 +37,7 @@ def getString(inputMessage):
 
 def parleg(leg):
     tlis = leg.split("-")
-    return tlis[0]+int(tlis[1])
+    return [tlis[0]+int(tlis[1])]
 
 def unparleg(leglist):
     return leglist[0]+'-'+str(leglist[1]).zfill(3)
