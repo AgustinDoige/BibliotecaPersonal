@@ -1,5 +1,6 @@
 #encoding utf-8
 import pickle
+import json
 
 def AddInOrder(lis,it):
     "It adds an element in an ordered list in the correct place to preserve said order"
@@ -147,7 +148,32 @@ class Libro:
         
     def confirmData(self):
         #Goes through every data saved in Book and asks for console confirmation. It modifies the data that is wrong.
-        return
+        print("Confirming Book Information")
+        print(self)
+        if getBool("Is everything correct?"):
+            return
+        if getBool(f"is (leg='{self.leg}') incorrect?"):
+            self.leg = getString("Input leg")
+        if getBool(f"is (title='{self.title}') incorrect?"):
+            self.title = getString("Input title")
+        if getBool(f"is (author='{self.author}') incorrect?"):
+            self.author = getString("Input author")
+        if getBool(f"is (stateLib='{self.stateLib}') incorrect?"):
+            self.stateLib = getString("Input stateLib")
+        if getBool(f"is (stateLec='{self.stateLec}') incorrect?"):
+            self.stateLec = getString("Input stateLec")
+        if getBool(f"is (location='{self.location}') incorrect?"):
+            self.location = getString("Input location")
+        if getBool(f"is (owner='{self.owner}') incorrect?"):
+            self.owner = getString("Input owner")       
+    
+    def shStr(self):
+        #Returns a one line short informtion about a book
+        return f"({self.leg}-{self.title})"
+    
+    def getBookDict(self):
+        #RETURNS A DICTIONARY WITH THE RELEVANT INFORMATION. A DICT THAT COULD BE USED AS A ARGUMENT TO CREATE A NEW DICT
+        pass
 
     def __str__(self):
         anStr = f"Libro {self.leg}::\n\t{self.title} - {self.author}\tGenero: {self.genre}\n\tEstado: {self.stateLib} y {self.stateLec}.\t"
@@ -170,13 +196,13 @@ class Biblioteca:
         self.ownerDic = {'propio':[]}
         self.locationDic = {'fisica':[],'digital':[]}
 
-    def addBook(self,book):
+    def addBook(self,book,getConfirm=True):
         if (book.leg == 'AAA-000'):
             print("Legajo generico detectado.\nLlamando self.generateNewLeg()")
             book.leg = self.generateNewLeg()
         print("Imprimiendo libro para agregar:")       
         print(book)
-        if getBool("¿Agregar este libro?"):
+        if (getConfirm==False) or (getBool("¿Agregar este libro?")):
             try:
                 _ = self.catalog[book.leg]
                 tilt("ERROR: Tried to add book with a leg already used by the following book:\n{}".format(self.catalog[book.leg]))
@@ -258,26 +284,74 @@ class Biblioteca:
             return self.leglis.index(l)+1
         except ValueError:
             tilt("Error in getNextIndLeg. input argument: {}".format(l))
-
-    def markAsRemoved(self,leg):
-        #use list.remove(element)
-        # book = self.catalog[leg]
-        pass
     
     def deleteBook(self,leg):
-        pass
+        try:
+            book = self.catalog[leg]
+        except KeyError:
+            print(f"Trying to delete {leg}. Book not found on Bibl Catalog")
+            print("Deletion Missed")
+        del self.catalog[leg]
+        self.leglis.remove(leg)
+        self.authorDic[book.author].remove(leg)
+        self.genreDic[book.genre].remove(leg)
+        self.stateLecDic[book.stateLec].remove(leg)
+        self.stateLibDic[book.stateLib].remove(leg)
+        self.ownerDic[book.owner].remove(leg)
+        self.locationDic[book.location].remove(leg)
 
     def editBook(self,leg):
-        pass
+        try:
+            print("Change leg to 'AAA-000' to generate new leg")
+            book = self.catalog[leg]
+        except KeyError:
+            print(f"Trying to edit {leg}. Book not found on Bibl Catalog")
+            print("Missing Edition")
+        self.deleteBook(book)
+        book.confirmData()
+        self.addBook(book)
 
     def saveIntoFile(self,filename):
-        #creates a file with filename and saves contents of the library in a parsable text form
-        pass
+        bookLis = []
+        for lg in self.leglis:
+            book = self.catalog[lg]
+            bookLis.append(book.getBookDict())
+        with open(filename,"w") as g:
+	        json.dump(bookLis,g,indent=2)
+
+        # TODO TEST TODO TEST TODO TEST TODO TEST TODO TEST TODO TEST
+        # AFTER FINISHING getBookDict test if this works. I don't know if you can save lists as json
 
     def loadLibraryFromFile(self,filename):
-        #abre la forma parsable creada por saveIntoFile y carga todos los datos a la biblioteca
-        pass
+        with open(filename,"r") as g:
+	        bookLis = json.load(g)
+        for bk in bookLis:
+            self.addBook(bk,getConfirm=False)
+            print(f"Added {bk.shStr()}.")
 
     def saveClassObject(self,filename):
-        #use pickle
-        pass
+        with open(filename,'wb') as file:
+            pickle.dump(self,file)
+
+    def __str__(self):
+        line = "______________________________________________"
+        strLis = ["\n",line,"\n"]
+        for l in self.leglis:
+            strLis.append(self.catalog[l].shStr())
+            strLis.append("\n")
+        strLis.append(f"\n{line}\nBy Author:\n")
+        for aut in self.authorDic:
+            strLis.append(f"\n\t{aut}:")
+            for bk in self.authorDic[aut]:
+                strLis.append(self.catalog[bk].shStr())
+                strLis.append("\t")
+        strLis.append(f"\n{line}\nBy Genre:\n")
+        for gen in self.genreDic:
+            strLis.append(f"\n\t{gen}:")
+            for bk in self.genreDic[gen]:
+                strLis.append(self.catalog[bk].shStr())
+                strLis.append("\t")
+        ans = ''
+        for st in strLis:
+            ans += st
+        return ans
