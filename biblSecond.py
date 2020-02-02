@@ -70,7 +70,22 @@ def nextLetterTrio(st):
             return alphabet[alphabet.index(st[0])+1]+"AA"
         return st[0]+alphabet[alphabet.index(st[1])+1]+"A"
     return st[0]+st[1]+alphabet[alphabet.index(st[2])+1]
-            
+
+def averageLetterTrio(st1,st2):
+    alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    if st1[0]==st2[0]:
+        if st1[1]==st2[1]:
+            in1 = alphabet.index(st1[2])
+            in2 = alphabet.index(st2[2])
+            return st1[:-1]+alphabet[round((in1+in2)/2)] #RISK: AAA and AAB would get AAA
+        in1 = alphabet.index(st1[2])
+        in2 = alphabet.index(st2[2])
+
+
+
+
+
+
 class Libro:
     def __init__(self,arg=''):
         # Legajo Nombre Autor Genero Estado_de_Libro Estado_de_Lectura
@@ -250,12 +265,15 @@ class Biblioteca:
             sucesorInmediatoBool = getBool("Legajo sucesor:\n\tEl numero obtenido es el inmediatamente siguiente al libro anterior, sin posibilidad de futuros libros en el medio. Reservado para secuelas o volumenes.\n¿Es un legajo sucesor?")
             prevleg = parleg(getString("Introducir legajo anterior:"))
             try:  #Seeing if leg introduced exists
-                ind = self.leglis.index(prevleg)
+                ind = self.leglis.index(unparleg(prevleg))
+                if getBool("Imprimir Legajos Cercanos?"):
+                    if (ind-7>0):
+                        print(self.leglis[ind-7:ind+7])
+                    else:
+                        print(self.leglis[0:ind+7])
             except Exception:
                 print("Legajo introducido no encontrado en biblioteca.\nRegenerando.")
                 return self.generateNewLeg()
-            if getBool("¿Mostrar legajos cercanos?"):
-                print(self.leglis[ind-7:ind+8])
             if(sucesorInmediatoBool):
                 if (prevleg[1]==999):
                     lAns = unparleg([nextLetterTrio(prevleg[0]),0])
@@ -270,14 +288,18 @@ class Biblioteca:
                     return self.generateNewLeg()
                 else:
                     return lAns
-            nextLeg = self.getNextIndLeg(prevleg)
+            # IMPLICIT ELSE: sucesorInmediatoBool = False
+            nextLeg = parleg(self.getNextIndLeg(prevleg))
             if (prevleg[0]==nextLeg[0]):
-                lAns = unparleg(prevleg[0],)
-            else:
-                pass
-                #TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            
-            
+                return unparleg([prevleg[0],round((prevleg[1]+nextLeg[1])/2)])
+            # IMPLICIT ELSE: Need aerage between two 3-LETTERS words
+            # TODO FIX getAverageLeg doesn't know what to do when AAA and AAB
+            ####lAns = getAverageLeg(unparleg(prevleg))
+            if not self.avaliableLeg(lAns):
+                print(f"Error: Legajo Generado ({lAns}) no disponible.\nRegenerando.")
+                return self.generateNewLeg()
+            return lAns
+
     def getNextIndLeg(self,l):
         #returns the next logged book in the library
         try:
