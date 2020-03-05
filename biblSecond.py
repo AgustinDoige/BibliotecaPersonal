@@ -1,6 +1,16 @@
 #encoding utf-8
 import pickle
 import json
+#:::::::::::::GLOBAL VARIABLES::::::::::::
+GLOBALalphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+GLOBALalphabetDic = {}
+GLOBALnumericDic = {}
+i = 1
+for letter in GLOBALalphabet:
+    GLOBALalphabetDic[letter]=i
+    GLOBALnumericDic[i]=letter
+    i += 1
+#:::::::::::::::::::::::::::::::::::::::::
 
 def AddInOrder(lis,it):
     "It adds an element in an ordered list in the correct place to preserve said order"
@@ -62,7 +72,7 @@ def logDict(dic,key,item):
 
 def nextLetterTrio(st):
     #  returns AAB from AAA, ABA from AAZ and so on
-    alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    global GLOBALalphabet
     if st[2]=="Z":
         if st[1]=="Z":
             if st[0]=="Z":
@@ -71,20 +81,18 @@ def nextLetterTrio(st):
         return st[0]+alphabet[alphabet.index(st[1])+1]+"A"
     return st[0]+st[1]+alphabet[alphabet.index(st[2])+1]
 
-def averageLetterTrio(st1,st2):
-    alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
-    if st1[0]==st2[0]:
-        if st1[1]==st2[1]:
-            in1 = alphabet.index(st1[2])
-            in2 = alphabet.index(st2[2])
-            return st1[:-1]+alphabet[round((in1+in2)/2)] #RISK: AAA and AAB would get AAA
-        in1 = alphabet.index(st1[2])
-        in2 = alphabet.index(st2[2])
-
-
-
-
-
+# def averageLetterTrio(st1,st2):
+#     global GLOBALalphabet
+#     global GLOBALalphabetDic
+#     letterTuple1 = (GLOBALalphabetDic[st1[0]],GLOBALalphabetDic[st1[1]],GLOBALalphabetDic[st1[2]])    
+#     letterTuple2 = (GLOBALalphabetDic[st2[0]],GLOBALalphabetDic[st2[1]],GLOBALalphabetDic[st2[2]])
+#     if st1[0]==st2[0]:
+#         if st1[1]==st2[1]:
+#             in1 = alphabet.index(st1[2])
+#             in2 = alphabet.index(st2[2])
+#             return st1[:-1]+alphabet[round((in1+in2)/2)] #RISK: AAA and AAB would get AAA
+#         in1 = alphabet.index(st1[2])
+#         in2 = alphabet.index(st2[2])
 
 class Libro:
     def __init__(self,arg=''):
@@ -292,9 +300,42 @@ class Biblioteca:
             nextLeg = parleg(self.getNextIndLeg(prevleg))
             if (prevleg[0]==nextLeg[0]):
                 return unparleg([prevleg[0],round((prevleg[1]+nextLeg[1])/2)])
-            # IMPLICIT ELSE: Need aerage between two 3-LETTERS words
-            # TODO FIX getAverageLeg doesn't know what to do when AAA and AAB
-            ####lAns = getAverageLeg(unparleg(prevleg))
+            # IMPLICIT ELSE: Need average between two 3-LETTERS words
+            
+            global GLOBALalphabetDic
+            global GLOBALnumericDic
+            #prevleg := ["ABC",500]  -> prevAlphTuple := (1,2,3)
+            prevAlphTuple = (GLOBALalphabetDic[prevleg[0][0]],GLOBALalphabetDic[prevleg[0][1]],GLOBALalphabetDic[prevleg[0][2]])    
+            nextAlphTuple = (GLOBALalphabetDic[nextLeg[0][0]],GLOBALalphabetDic[nextLeg[0][1]],GLOBALalphabetDic[nextLeg[0][2]])
+            av1 = (prevAlphTuple[0]+nextAlphTuple[0])/2
+            av2 = (prevAlphTuple[1]+nextAlphTuple[1])/2
+            av3 = (prevAlphTuple[2]+nextAlphTuple[2])/2
+            if (prevAlphTuple[0]==nextAlphTuple[0]):
+                #Aab-c Ade-f
+                if (prevAlphTuple[1]==nextAlphTuple[1]):
+                    #AAx-y   AAw-z
+                    if prevAlphTuple[1]+1==nextAlphTuple[1]:
+                        #AAA-x  AAB-y
+                        if ((prevleg[1]==999)and (nextLeg[1]==0)):
+                            #AAA-999  AAB-000
+                            print(f"Error: Legajos continuos, No hay espacio para legajo intermedio. \nRegenerando.")
+                            return self.generateNewLeg()
+                        #IMPLICIT ELSE: #AAA-x  AAB-y   x!=999 o y!=000
+                        t = (prevleg[1]+nextLeg[1]+1000)/2
+                        if (t<1000):
+                            lAns = unparleg([prevleg[0],round(t)])
+                        else:
+                            lAns = unparleg([nextleg[0],round(t)-1000])
+                    else:
+                        #TODO TODO TODO
+                        #TODO TODO TODO
+                        #TODO TODO TODO
+                        #TODO TODO TODO
+                        #TODO TODO TODO
+                    #TODO TODO TODO
+                    #TODO TODO TODO
+                #TODO TODO TODO
+            #TODO TODO TODO
             if not self.avaliableLeg(lAns):
                 print(f"Error: Legajo Generado ({lAns}) no disponible.\nRegenerando.")
                 return self.generateNewLeg()
